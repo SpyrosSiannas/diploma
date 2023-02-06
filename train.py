@@ -2,7 +2,7 @@ from vae import VAE
 from decoder import PointCloudDecoder
 from encoder import PointCloudEncoder
 import torch.optim as optim
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 from torch_geometric.datasets import ModelNet
 from torch.nn import functional as F
 import torch
@@ -15,30 +15,38 @@ def loss_fn(recon_x, x, mu, logvar):
 
 
 def main() -> None:
-    # Load the ModelNet10 dataset
-    dataset = ModelNet(root='dataset', name='10', train=True)
-    data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
-
     # Initialize the point cloud encoder and decoder networks
     in_channels = 3
-    hidden_channels = 64
     latent_channels = 32
     out_channels = 3
-    encoder = PointCloudEncoder(in_channels, hidden_channels, latent_channels)
-    decoder = PointCloudDecoder(latent_channels, hidden_channels, out_channels)
+    encoder = PointCloudEncoder(latent_channels)
+    decoder = PointCloudDecoder(latent_channels)
 
-    model = VAE(latent_channels, encoder, decoder)
     # Define the loss function and optimizer
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
     dataset = ModelNet(root='dataset', name='10', train=True)
     data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    num_epochs = 1000
 
-    for epoch in range(100):
-        for batch_idx, data in enumerate(data_loader):
-            optimizer.zero_grad()
-            recon_batch, mu, logvar = model(data.x)
-            loss = loss_fn(recon_batch, data.x, mu, logvar)
-            loss.backward()
+    model = VAE(encoder, decoder).to(device)  # initialize the model
+    # initialize the optimizer
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    for epoch in range(num_epochs):
+        for data in data_loader:
+            pos = data.pos.to(device)  # move the input data to the GPU
+            y = data.y.to(device)
+            optimizer.zero_grad()  # reset the gradients
+            # forward pass through the model
+            recon_x, mu, log_var = model(pos, y)
+            recon_loss = F.mse_loss(recon_x, pos)  # reconstruction loss
+            # KL divergence loss
+            kl_loss = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
+            loss = recon_loss + kl_loss  # overall loss
+            loss.backward()  # compute the gradients
+            optimizer.step()  # update the parameters
+        print("Epoch [{}/{}], Loss: {:.4f}".format(epoch +
+              1, num_epochs, loss.item()))
 
 
 if __name__ == "__main__":

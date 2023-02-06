@@ -1,20 +1,22 @@
 import torch.nn as nn
-import torch.nn.functional as F
-from torch_geometric.nn import PointConv, global_max_pool
+from torch_geometric.nn import NNConv, global_max_pool
+import torch
 
 
 class PointCloudEncoder(nn.Module):
-    def __init__(self, in_channels, hidden_channels, out_channels, num_layers):
+    def __init__(self, latent_dim):
         super(PointCloudEncoder, self).__init__()
+        self.fc1 = nn.Linear(3, 128)
+        self.conv1 = NNConv(128, 256, self.nn)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc_mu = nn.Linear(128, latent_dim)
+        self.fc_logvar = nn.Linear(128, latent_dim)
 
-        self.conv = PointConv(
-            in_channels, hidden_channels, num_layers=num_layers)
-        self.fc1 = nn.Linear(hidden_channels, hidden_channels//2)
-        self.fc2 = nn.Linear(hidden_channels//2, out_channels)
-
-    def forward(self, x, edge_index):
-        x = self.conv(x, edge_index)
-        x = global_max_pool(x, batch=None)
-        x = F.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+    def forward(self, x, edge_index, batch):
+        x = torch.relu(self.fc1(x))
+        x = self.conv1(x, edge_index)
+        x = torch.relu(self.fc2(x))
+        x = global_max_pool(x, batch)
+        mu = self.fc_mu(x)
+        logvar = self.fc_logvar(x)
+        return mu, logvar
