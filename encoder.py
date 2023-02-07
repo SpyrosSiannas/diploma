@@ -1,22 +1,27 @@
-import torch.nn as nn
-from torch_geometric.nn import NNConv, global_max_pool
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+from torch_geometric.nn import global_max_pool
 
 
 class PointCloudEncoder(nn.Module):
-    def __init__(self, latent_dim):
-        super(PointCloudEncoder, self).__init__()
-        self.fc1 = nn.Linear(3, 128)
-        self.conv1 = NNConv(128, 256, self.nn)
-        self.fc2 = nn.Linear(256, 128)
-        self.fc_mu = nn.Linear(128, latent_dim)
-        self.fc_logvar = nn.Linear(128, latent_dim)
+    def __init__(self, point_dim=3, hidden_dim=64, latent_dim=32):
+        super().__init__()
+        # Encoder architecture
+        # input_dim = 3 (x, y, z)
+        # 1d Conv filter with hidden_dim = 64
 
-    def forward(self, x, edge_index, batch):
-        x = torch.relu(self.fc1(x))
-        x = self.conv1(x, edge_index)
-        x = torch.relu(self.fc2(x))
-        x = global_max_pool(x, batch)
-        mu = self.fc_mu(x)
-        logvar = self.fc_logvar(x)
-        return mu, logvar
+        # fully connected layer with latent_dim = 32
+        # second fully connected layer with latent_dim = 32
+
+        self.conv = nn.Conv1d(in_channels=point_dim,
+                              out_channels=hidden_dim, kernel_size=1)
+        self.fc1 = nn.Linear(1, latent_dim)
+        self.fc2 = nn.Linear(1, latent_dim)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = torch.max(x, 1, keepdim=True)[0]
+        mean = self.fc1(x)
+        logvar = self.fc2(x)
+        return mean, logvar
