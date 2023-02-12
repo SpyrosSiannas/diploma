@@ -19,8 +19,3 @@ class VAE(nn.Module):
         std = torch.exp(0.5*logvar)
         eps = torch.randn_like(std)
         return mu + eps*std
-
-    def loss(self, recon_x, x, mu, log_var):
-        BCE = F.binary_cross_entropy(recon_x, x, reduction='sum')
-        KLD = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
-        return BCE + KLD

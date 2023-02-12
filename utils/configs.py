@@ -1,7 +1,14 @@
 
 from dataclasses import dataclass
 
-from utils.network_cfg import NNConfig
+
+@dataclass
+class NNConfig():
+    point_dim: int = 3
+    hidden_dim: int = 64
+    latent_dim: int = 32
+    num_points: int = 2048
+    num_epochs: int = 500
 
 
 @dataclass

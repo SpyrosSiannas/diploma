@@ -6,12 +6,6 @@ import torch.nn.functional as F
 class PointCloudEncoder(nn.Module):
     def __init__(self, in_channels=3, hidden_dim=128, latent_dim=64, num_points=2048):
         super().__init__()
-        # Encoder architecture
-        # input_dim = 3 (x, y, z)
-        # 1d Conv filter with hidden_dim = 64
-
-        # fully connected layer with latent_dim = 32
-        # second fully connected layer with latent_dim = 32
         self.in_channels = in_channels
         self.hidden_dim = hidden_dim
         self.latent_dim = latent_dim
