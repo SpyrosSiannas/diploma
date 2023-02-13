@@ -1,13 +1,14 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
+from model.base.vae_base import VAE
+from model.encoders_decoders.vanilla_decoder import VanillaDecoder
+from model.encoders_decoders.vanilla_encoder import VanillaEncoder
 
 
-class VAE(nn.Module):
-    def __init__(self, encoder, decoder):
-        super(VAE, self).__init__()
-        self.encoder = encoder
-        self.decoder = decoder
+class VanillaVAE(VAE):
+    def __init__(self):
+        super().__init__(VanillaEncoder(), VanillaDecoder())
 
     def forward(self, data):
         mu, logvar = self.encoder(data)

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 class NNConfig():
     point_dim: int = 3
     hidden_dim: int = 64
-    latent_dim: int = 32
+    latent_dim: int = 64
     num_points: int = 2048
     num_epochs: int = 500
 
@@ -19,3 +19,4 @@ class TrainConfig():
     device: object = None
     nn_cfg: NNConfig = NNConfig()
     loss_fn: object = None
+    num_epochs: int = 500
