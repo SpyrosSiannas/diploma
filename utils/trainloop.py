@@ -28,14 +28,11 @@ class Trainer():
                 tepoch.set_description(f"Epoch {epoch + 1}")
                 original, recon_x, loss = self.__trainloop(data)
                 tepoch.set_postfix(loss=loss)
-            self.writer.add_mesh(
-                "original", original[2, :, :].unsqueeze(0).detach(), global_step=epoch+1)
-            self.writer.add_mesh(
-                "point_cloud", recon_x.transpose(2, 1)[2, :, :].unsqueeze(0).detach(), global_step=epoch+1)
-            self.writer.add_text(
-                "recon_x.shape", f"{recon_x.shape}", global_step=epoch+1)
-            self.writer.add_text(
-                "original.shape", f"{original.shape}", global_step=epoch+1)
+            if (epoch) % 5 == 0:
+                self.writer.add_mesh(
+                    "original", original[2, :, :].unsqueeze(0).detach(), global_step=epoch+1)
+                self.writer.add_mesh(
+                    "point_cloud", recon_x.transpose(2, 1)[2, :, :].unsqueeze(0).detach(), global_step=epoch+1)
 
     def __trainloop(self, data: Batch):
         self.optimizer.zero_grad()
