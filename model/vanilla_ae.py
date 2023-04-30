@@ -1,5 +1,5 @@
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 from model.base.decoder_base import PointCloudDecoder
 from model.base.encoder_base import PointCloudEncoder
@@ -13,12 +13,11 @@ class EncoderNet(PointCloudEncoder):
         self.latent_dim = latent_dim
         self.num_points = num_points
 
-        self.conv1 = nn.Conv1d(in_channels, hidden_dim//2,
-                               kernel_size=1)
-        self.conv2 = nn.Conv1d(hidden_dim//2, hidden_dim//2, kernel_size=1)
-        self.conv3 = nn.Conv1d(hidden_dim//2, hidden_dim, kernel_size=1)
-        self.bn1 = nn.BatchNorm1d(hidden_dim//2)
-        self.bn2 = nn.BatchNorm1d(hidden_dim//2)
+        self.conv1 = nn.Conv1d(in_channels, hidden_dim // 2, kernel_size=1)
+        self.conv2 = nn.Conv1d(hidden_dim // 2, hidden_dim // 2, kernel_size=1)
+        self.conv3 = nn.Conv1d(hidden_dim // 2, hidden_dim, kernel_size=1)
+        self.bn1 = nn.BatchNorm1d(hidden_dim // 2)
+        self.bn2 = nn.BatchNorm1d(hidden_dim // 2)
         self.bn3 = nn.BatchNorm1d(hidden_dim)
 
         self.pool1 = nn.MaxPool1d(num_points, None)
@@ -50,14 +49,14 @@ class DecoderNet(PointCloudDecoder):
         self.latent_dim = latent_dim
         self.num_points = num_points
 
-        self.fc1 = nn.Linear(in_features=latent_dim, out_features=hidden_dim*4)
-        self.fc2 = nn.Linear(in_features=hidden_dim*4,
-                             out_features=hidden_dim*8)
-        self.fc3 = nn.Linear(in_features=hidden_dim*8,
-                             out_features=output_dim*num_points)
+        self.fc1 = nn.Linear(in_features=latent_dim, out_features=hidden_dim * 4)
+        self.fc2 = nn.Linear(in_features=hidden_dim * 4, out_features=hidden_dim * 8)
+        self.fc3 = nn.Linear(
+            in_features=hidden_dim * 8, out_features=output_dim * num_points
+        )
 
-        self.bn1 = nn.BatchNorm1d(hidden_dim*4)
-        self.bn2 = nn.BatchNorm1d(hidden_dim*8)
+        self.bn1 = nn.BatchNorm1d(hidden_dim * 4)
+        self.bn2 = nn.BatchNorm1d(hidden_dim * 8)
 
     def forward(self, z):
         x = torch.relu(self.bn1(self.fc1(z)))
@@ -67,7 +66,7 @@ class DecoderNet(PointCloudDecoder):
         return x
 
 
-class VanillaAutoEncoder():
+class VanillaAutoEncoder:
     def __init__(self, encoder, decoder):
         super(VanillaAutoEncoder, self).__init__()
         self.encoder = encoder

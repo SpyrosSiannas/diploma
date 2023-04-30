@@ -1,23 +1,24 @@
 import torch
 import torch.nn as nn
 
-from model.base.vae_base import VAE
 from model.base.decoder_base import PointCloudDecoder
 from model.base.encoder_base import PointCloudEncoder
+from model.base.vae_base import VAE
 
 
 class EncoderNet(PointCloudEncoder):
-    def __init__(self, in_channels=3, hidden_dim=2*254, latent_dim=128, num_points=2048):
+    def __init__(
+        self, in_channels=3, hidden_dim=2 * 254, latent_dim=128, num_points=2048
+    ):
         super().__init__()
         self.in_channels = in_channels
         self.hidden_dim = hidden_dim
         self.latent_dim = latent_dim
         self.num_points = num_points
 
-        self.conv1 = nn.Conv1d(in_channels, hidden_dim//2,
-                               kernel_size=1)
-        self.conv2 = nn.Conv1d(hidden_dim//2, hidden_dim, kernel_size=1)
-        self.bn1 = nn.BatchNorm1d(hidden_dim//2)
+        self.conv1 = nn.Conv1d(in_channels, hidden_dim // 2, kernel_size=1)
+        self.conv2 = nn.Conv1d(hidden_dim // 2, hidden_dim, kernel_size=1)
+        self.bn1 = nn.BatchNorm1d(hidden_dim // 2)
         self.bn2 = nn.BatchNorm1d(hidden_dim)
 
         self.pool1 = nn.MaxPool1d(num_points)
@@ -51,14 +52,14 @@ class DecoderNet(PointCloudDecoder):
         self.latent_dim = latent_dim
         self.num_points = num_points
 
-        self.fc1 = nn.Linear(in_features=latent_dim, out_features=hidden_dim*4)
-        self.fc2 = nn.Linear(in_features=hidden_dim*4,
-                             out_features=hidden_dim*8)
-        self.fc3 = nn.Linear(in_features=hidden_dim*8,
-                             out_features=output_dim*num_points)
+        self.fc1 = nn.Linear(in_features=latent_dim, out_features=hidden_dim * 4)
+        self.fc2 = nn.Linear(in_features=hidden_dim * 4, out_features=hidden_dim * 8)
+        self.fc3 = nn.Linear(
+            in_features=hidden_dim * 8, out_features=output_dim * num_points
+        )
 
-        self.bn1 = nn.BatchNorm1d(hidden_dim*4)
-        self.bn2 = nn.BatchNorm1d(hidden_dim*8)
+        self.bn1 = nn.BatchNorm1d(hidden_dim * 4)
+        self.bn2 = nn.BatchNorm1d(hidden_dim * 8)
 
     def forward(self, z):
         x = torch.relu(self.bn1(self.fc1(z)))
@@ -79,6 +80,6 @@ class VanillaVAE(VAE):
         return x_recon, mu, logvar
 
     def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5*logvar)
+        std = torch.exp(0.5 * logvar)
         eps = torch.randn_like(std)
-        return mu + eps*std
+        return mu + eps * std

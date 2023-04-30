@@ -6,4 +6,4 @@ class PointCloudEncoder(nn.Module):
         super(PointCloudEncoder, self).__init__()
 
     def forward(self, data):
-        assert False, "Not implemented in a base class"
+        raise NotImplementedError()
