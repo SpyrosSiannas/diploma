@@ -1,4 +1,5 @@
 from torch import nn
+
 from model.base.decoder_base import PointCloudDecoder
 from model.base.encoder_base import PointCloudEncoder
 
@@ -10,7 +11,7 @@ class VAE(nn.Module):
         self.decoder = decoder
 
     def forward(self, data):
-        assert False, "Not implemented in a base class"
+        raise AssertionError("Not implemented in a base class")
 
     def reparameterize(self, mu, logvar):
-        assert False, "Not implemented in a base class"
+        raise AssertionError("Not implemented in a base class")

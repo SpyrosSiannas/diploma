@@ -2,10 +2,12 @@ import MinkowskiEngine as ME
 import torch
 import torch.nn as nn
 from inception_residual import InceptionResidualBlock
+from modelutils import make_block
 
-class InterframeEncdoer(nn.Module):
+
+class InterframeEncoder(nn.Module):
     def __init__(self, channels=None) -> None:
-        super(InterframeEncdoer, self).__init__()
+        super(InterframeEncoder, self).__init__()
         if channels is None:
             # Default channels
             channels = [1, 16, 32, 64, 32, 8]
@@ -26,7 +28,7 @@ class InterframeEncdoer(nn.Module):
             bias=True,
             dimension=3,
         )
-        self.block0 = self.__make_block(
+        self.block0 = make_block(
             InceptionResidualBlock, num_layers=3, channels=channels[2]
         )
 
@@ -46,7 +48,7 @@ class InterframeEncdoer(nn.Module):
             bias=True,
             dimension=3,
         )
-        self.block1 = self.__make_block(
+        self.block1 = make_block(
             InceptionResidualBlock, num_layers=3, channels=channels[3]
         )
 
@@ -66,7 +68,7 @@ class InterframeEncdoer(nn.Module):
             bias=True,
             dimension=3,
         )
-        self.block2 = self.__make_block(
+        self.block2 = make_block(
             InceptionResidualBlock, num_layers=3, channels=channels[4]
         )
 
@@ -92,19 +94,13 @@ class InterframeEncdoer(nn.Module):
 
         return [out0, out1, out2]
 
-    @staticmethod
-    def __make_block(nn_module: nn.Module, num_layers: int, channels: int):
-        block = []
-        for _ in range(num_layers):
-            block.append(nn_module(channels))
-        return torch.nn.Sequential(*block)
 
 if __name__ == "__main__":
-    model = InterframeEncdoer().cuda()
-    #create random sparse tensor input with ME
+    model = InterframeEncoder().cuda()
+    # create random sparse tensor input with ME
 
-    coords = torch.rand(1024,4).cuda()
-    feats = torch.randn(1024,1).cuda()
+    coords = torch.rand(1024, 4).cuda()
+    feats = torch.randn(1024, 1).cuda()
     input = ME.SparseTensor(
         features=feats,
         coordinates=coords,

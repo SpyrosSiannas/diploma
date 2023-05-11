@@ -46,7 +46,7 @@ class EntropyBottleneck(nn.Module):
     > J. Balle, D. Minnen, S. Singh, S. J. Hwang, N. Johnston
     > https://arxiv.org/abs/1802.01436."""
 
-    def __init__(self, channels, init_scale=8, filters=(3, 3, 3)):
+    def __init__(self, channels: int, init_scale: int = 8, filters=(3, 3, 3)):
         """Create parameters."""
         super(EntropyBottleneck, self).__init__()
         self._likelihood_bound = 1e-9
@@ -207,7 +207,8 @@ class EntropyBottleneck(nn.Module):
 
         return values
 
-if __name__ ==  "__main__":
+
+if __name__ == "__main__":
     model = EntropyBottleneck(8)
     model.cuda()
     model.eval()
@@ -220,4 +221,3 @@ if __name__ ==  "__main__":
     x_recon = model.decompress(strings, min_v[0], max_v[0], x.shape, x.shape[-1])
     x = x.cpu()
     print("==== Model run succesfully ====")
-

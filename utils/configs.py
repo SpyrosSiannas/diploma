@@ -1,9 +1,8 @@
-
 from dataclasses import dataclass
 
 
 @dataclass
-class NNConfig():
+class NNConfig:
     point_dim: int = 3
     hidden_dim: int = 64
     latent_dim: int = 64
@@ -12,7 +11,7 @@ class NNConfig():
 
 
 @dataclass
-class TrainConfig():
+class TrainConfig:
     model: object = None
     optimizer: object = None
     train_loader: object = None

@@ -6,4 +6,4 @@ class PointCloudDecoder(nn.Module):
         super(PointCloudDecoder, self).__init__()
 
     def forward(self, latent_vec):
-        assert False, "Not implemented in a base class"
+        raise AssertionError("Not implemented in a base class")
