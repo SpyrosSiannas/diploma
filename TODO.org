@@ -1,0 +1,15 @@
+* Implementation
+** [DONE]: "Borrow" entropy bottleneck
+** [TODO]: Implement arithmetic encoder architecture
+** [TODO]: Implement arithmetic decoder architecture
+** [TODO]: Implement mpeg's octtree encoder
+** [TODO]: Test run with dataset
+* Writing
+
+* Notes
+** IRN
+We are using Inception Residual Blocks as mentioned in https://arxiv.org/pdf/2011.03799.pdf for efficient feature aggregation 
+(less computation and training time as mentioned in: https://openreview.net/pdf?id=q7kqBkL33f8LEkD3t7X9)
+** Entropy bottleneck
+We learn the distribution of the output tensor using the Entropy bottleneck layer and we use it to perform arithmetic
+encoding and decoding of the output tensor. (https://arxiv.org/abs/1802.01436.)
