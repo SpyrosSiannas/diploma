@@ -1,6 +1,6 @@
 * Implementation
 ** [DONE]: "Borrow" entropy bottleneck
-** [TODO]: Implement arithmetic encoder architecture
+** [DONE]: Implement arithmetic encoder architecture
 ** [TODO]: Implement arithmetic decoder architecture
 ** [TODO]: Implement mpeg's octtree encoder
 ** [TODO]: Test run with dataset
