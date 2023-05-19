@@ -2,13 +2,6 @@ import os
 from typing import List
 
 import numpy as np
-import torch
-import torch.optim as optim
-
-from model.vanilla_vae import VanillaVAE
-from utils.configs import TrainConfig
-from utils.dataset import get_data_loader
-from utils.loss import custom_loss
 
 PLY_HEADER = """ply
 format ascii 1.0
@@ -35,6 +28,7 @@ def parse_ply_ascii_line(line: str) -> List[float]:
         line_values = [float(x) for x in line.rstrip().split(" ")]
     except Exception as e:
         print(f"Error parsing line: {line}, {e}")
+        line_values = []
 
     return line_values
 
@@ -52,6 +46,10 @@ def read_ply_ascii_geo(filedir):
     """
     with open(filedir) as f:
         data = []
+        # Get rid of the header
+        for line in f:
+            if line.startswith("end_header"):
+                break
         for line in f:
             data.append(parse_ply_ascii_line(line))
         data = np.array(data)
@@ -76,19 +74,3 @@ def write_ply_ascii_geo(filedir, coords):
         for p in coords:
             coords_str = [str(x) for x in p]
             f.writelines(" ".join(coords_str) + "\n")
-
-
-def get_default_config() -> TrainConfig:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = VanillaVAE().to(device)  # initialize the model
-    # initialize the optimizer
-    optimizer = optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.999))
-
-    train_config = TrainConfig(
-        model=model,
-        optimizer=optimizer,
-        train_loader=get_data_loader(),
-        device=device,
-        loss_fn=custom_loss,
-    )
-    return train_config

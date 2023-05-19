@@ -1,10 +1,9 @@
 import os
 
+import MinkowskiEngine as ME
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric.data.batch import Batch
 from tqdm import tqdm
-
-from utils.loss import MSE_KLD
 
 
 class Trainer:
@@ -15,6 +14,7 @@ class Trainer:
         self.device = train_config.device
         self.nn_cfg = train_config.nn_cfg
         self.num_epochs = train_config.num_epochs
+        self.loss_fn = train_config.loss_fn
         self.writer = SummaryWriter("logs")
         if cleanup_logs:
             os.system("rm -rf logs/*")
@@ -44,14 +44,19 @@ class Trainer:
 
     def __trainloop(self, data: Batch):
         self.optimizer.zero_grad()
-        pos_reshaped = data.pos.reshape(-1, self.nn_cfg.num_points, 3).to(self.device)
+        #        pos_reshaped = data.pos.reshape(-1, self.nn_cfg.num_points, 3).to(self.device)
         # forward pass through the model
-        recon_x, mu, log_var = self.model(pos_reshaped.transpose(1, 2))
+        x = ME.SparseTensor(coordinates=data[0], features=data[1], device=self.device)
+        model_out = self.model(x, training=True)
         # compute the loss
-        loss = MSE_KLD(recon_x, pos_reshaped, mu, log_var)
+        loss = 0
+        for out_cls, ground_truth in zip(
+            model_out["out_cls_list"], model_out["ground_truth_list"], strict=False
+        ):
+            loss += self.loss_fn(out_cls, ground_truth) / float(data.__len__())
         loss.backward()  # compute the gradients
         self.optimizer.step()  # update the parameters
-        return pos_reshaped, recon_x, loss.item()
+        return data, model_out, loss.item()
 
     def release(self):
         self.writer.close()

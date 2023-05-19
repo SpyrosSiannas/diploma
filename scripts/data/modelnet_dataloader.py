@@ -2,12 +2,9 @@ import torch_geometric.transforms as T
 from torch_geometric.datasets import ModelNet
 from torch_geometric.loader import DataLoader
 
-from utils.configs import NNConfig as cfg
-
 
 def filter_sofa(example):
     return example["y"] == 7
-
 
 def get_data_loader(batch_size=32, num_workers=4, shuffle=True):
     dataset = ModelNet(
@@ -16,7 +13,7 @@ def get_data_loader(batch_size=32, num_workers=4, shuffle=True):
         pre_filter=filter_sofa,
         train=True,
         pre_transform=T.NormalizeScale(),
-        transform=T.SamplePoints(cfg.num_points),
+        transform=T.SamplePoints(500),
     )
     data_loader = DataLoader(
         dataset,

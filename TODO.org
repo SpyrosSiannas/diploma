@@ -14,3 +14,15 @@ We are using Inception Residual Blocks as mentioned in https://arxiv.org/pdf/201
 ** Entropy bottleneck
 We learn the distribution of the output tensor using the Entropy bottleneck layer and we use it to perform arithmetic
 encoding and decoding of the output tensor. (https://arxiv.org/abs/1802.01436.)
+
+** Dataset
+- Loader:
+Takes in a list of filepaths. Its len is the number of files
+- Structure:
+- Collation:
+
+
+** JPEG-Pleno Dataset Loader
+We need to differentiate from the other dataset loader (ShapeNet). 
+- Initialize with all the ply filepaths (sorted!!)
+- Use the cache mechanism

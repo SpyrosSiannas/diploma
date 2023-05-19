@@ -1,15 +1,12 @@
 import torch
 import torch.nn as nn
 
-from model.base.decoder_base import PointCloudDecoder
-from model.base.encoder_base import PointCloudEncoder
-from model.base.vae_base import VAE
+from models.base.decoder_base import PointCloudDecoder
+from models.base.encoder_base import PointCloudEncoder
 
 
 class EncoderNet(PointCloudEncoder):
-    def __init__(
-        self, in_channels=3, hidden_dim=2 * 254, latent_dim=128, num_points=2048
-    ):
+    def __init__(self, in_channels=3, hidden_dim=254, latent_dim=128, num_points=2048):
         super().__init__()
         self.in_channels = in_channels
         self.hidden_dim = hidden_dim
@@ -17,11 +14,13 @@ class EncoderNet(PointCloudEncoder):
         self.num_points = num_points
 
         self.conv1 = nn.Conv1d(in_channels, hidden_dim // 2, kernel_size=1)
-        self.conv2 = nn.Conv1d(hidden_dim // 2, hidden_dim, kernel_size=1)
+        self.conv2 = nn.Conv1d(hidden_dim // 2, hidden_dim // 2, kernel_size=1)
+        self.conv3 = nn.Conv1d(hidden_dim // 2, hidden_dim, kernel_size=1)
         self.bn1 = nn.BatchNorm1d(hidden_dim // 2)
-        self.bn2 = nn.BatchNorm1d(hidden_dim)
+        self.bn2 = nn.BatchNorm1d(hidden_dim // 2)
+        self.bn3 = nn.BatchNorm1d(hidden_dim)
 
-        self.pool1 = nn.MaxPool1d(num_points)
+        self.pool1 = nn.MaxPool1d(num_points, None)
 
         self.fc1 = nn.Linear(hidden_dim, hidden_dim)
         self.fc2 = nn.Linear(hidden_dim, latent_dim)
@@ -33,11 +32,9 @@ class EncoderNet(PointCloudEncoder):
     def forward(self, x):
         x = torch.relu(self.bn1(self.conv1(x)))
         x = torch.relu(self.bn2(self.conv2(x)))
-        # out : (batch_size, hidden_dim, num_points)
+        x = torch.relu(self.bn3(self.conv3(x)))
         x = self.pool1(x)
-        # out: (batch_size, hidden_dim, 1)
         x = x.view(-1, self.hidden_dim)
-        # out: (batch_size, hidden_dim)
         x = torch.relu(self.bn4(self.fc1(x)))
         mean = self.fc2(x)
         log_var = self.fc3(x)
@@ -69,17 +66,13 @@ class DecoderNet(PointCloudDecoder):
         return x
 
 
-class VanillaVAE(VAE):
-    def __init__(self):
-        super().__init__(EncoderNet(), DecoderNet())
+class VanillaAutoEncoder:
+    def __init__(self, encoder, decoder):
+        super(VanillaAutoEncoder, self).__init__()
+        self.encoder = encoder
+        self.decoder = decoder
 
     def forward(self, data):
-        mu, logvar = self.encoder(data)
-        z = self.reparameterize(mu, logvar)
-        x_recon = self.decoder(z)
-        return x_recon, mu, logvar
-
-    def reparameterize(self, mu, logvar):
-        std = torch.exp(0.5 * logvar)
-        eps = torch.randn_like(std)
-        return mu + eps * std
+        latent_vec = self.encoder(data)
+        x_recon = self.decoder(latent_vec)
+        return latent_vec, x_recon

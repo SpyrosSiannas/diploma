@@ -1,6 +1,17 @@
 import torch
 from torch.nn import functional as F
+from models.interframe_model.modelutils import isin
 
+
+def get_bce(data, groud_truth):
+    criterion = torch.nn.BCEWithLogitsLoss()
+    """ Input data and ground_truth are sparse tensor.
+    """
+    mask = isin(data.C, groud_truth.C)
+    bce = criterion(data.F.squeeze(), mask.type(data.F.dtype))
+    bce /= torch.log(torch.tensor(2.0)).to(bce.device)
+    sum_bce = bce * data.shape[0]
+    return sum_bce
 
 def MSE_KLD(recon_x, original, mean, log_var):
     MSE = F.mse_loss(recon_x, original)

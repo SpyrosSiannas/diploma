@@ -1,8 +1,8 @@
 import MinkowskiEngine as ME
 import torch
 import torch.nn as nn
-from inception_residual import InceptionResidualBlock
-from modelutils import make_block
+from .inception_residual import InceptionResidualBlock
+from .modelutils import make_block
 
 
 class InterframeEncoder(nn.Module):

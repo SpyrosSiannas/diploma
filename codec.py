@@ -5,9 +5,9 @@ import MinkowskiEngine as ME
 import numpy as np
 import torch
 
-from model.interframe_model import EntropyBottleneck
-from utils.gpcc import gpcc_decode, gpcc_encode
-from utils.utils import read_ply_ascii_geo, write_ply_ascii_geo
+from models.interframe_model import EntropyBottleneck
+from scripts.gpcc import gpcc_decode, gpcc_encode
+from scripts.utils import read_ply_ascii_geo, write_ply_ascii_geo
 
 
 class FeatureCoder:

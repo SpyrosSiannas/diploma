@@ -1,8 +1,8 @@
 import MinkowskiEngine as ME
 import torch.nn as nn
-from decoder import InterframeDecoder
-from encoder import InterframeEncoder
-from entropy_bottleneck import EntropyBottleneck
+from .decoder import InterframeDecoder
+from .encoder import InterframeEncoder
+from .entropy_bottleneck import EntropyBottleneck
 
 
 class InterFrameAE(nn.Module):
@@ -28,7 +28,7 @@ class InterFrameAE(nn.Module):
     def forward(self, x, training=False):
         # Encoder
         y_list = self.encoder(x)
-        y = y_list[0]
+        y = y_list[-1]
         ground_truth_list = y_list[1:] + [x]
         nums_list = [
             [len(C) for C in ground_truth.decomposed_coordinates]
