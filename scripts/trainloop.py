@@ -4,6 +4,7 @@ import MinkowskiEngine as ME
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric.data.batch import Batch
 from tqdm import tqdm
+import torch
 
 
 class Trainer:
@@ -49,13 +50,10 @@ class Trainer:
         x = ME.SparseTensor(coordinates=data[0], features=data[1], device=self.device)
         model_out = self.model(x, training=True)
         # compute the loss
-        loss = 0
-        for out_cls, ground_truth in zip(
-            model_out["out_cls_list"], model_out["ground_truth_list"], strict=False
-        ):
-            loss += self.loss_fn(out_cls, ground_truth) / float(data.__len__())
+        loss = self.loss_fn(model_out, x)
         loss.backward()  # compute the gradients
         self.optimizer.step()  # update the parameters
+        torch.cuda.empty_cache()
         return data, model_out, loss.item()
 
     def release(self):

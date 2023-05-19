@@ -86,7 +86,7 @@ def collate_pointcloud(list_data):
 # TODO: Change this to be prettier
 def make_jpeg_pleno_loader(
     file_list,
-    batch_size=1,
+    batch_size=2,
     shuffle=True,
     num_workers=4,
     repeat=False,

@@ -4,7 +4,11 @@
 ** [DONE]: Implement interframe decoder
 ** [DONE]: Implement arithmetic encoder / decoder architecture
 ** [DONE]: Implement mpeg's octtree encoder
-** [TODO]: Test run with dataset
+** [DONE]: Test run with dataset
+** [TODO]: Implement checkpoint mechanism
+** [TODO]: Implement tensorboard
+** [TODO]: Btter dataloader
+
 * Writing
 
 * Notes

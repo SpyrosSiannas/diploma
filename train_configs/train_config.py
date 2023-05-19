@@ -8,4 +8,4 @@ class TrainConfig:
     device: object = None
     nn_cfg  = None
     loss_fn: object = None
-    num_epochs: int = 500
+    num_epochs: int = 50
