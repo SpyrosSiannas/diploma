@@ -1,37 +1,8 @@
-import torch
-from scripts.utils import read_ply_ascii_geo
-import numpy as np
 import MinkowskiEngine as ME
+import numpy as np
+import torch
 
-class InfSampler(torch.utils.data.Sampler):
-    """Sample elements randomly, without replacement.
-
-    Args:
-    ----
-    data_source (Dataset): dataset to sample from
-    """
-
-    def __init__(self, data_source: torch.utils.data.Dataset, shuffle=False):
-        self.data_source = data_source
-        self.shuffle = shuffle
-        self.reset_permutation()
-
-    def reset_permutation(self):
-        perm = len(self.data_source)
-        if self.shuffle:
-            perm = torch.randperm(perm)
-        self._perm = perm.tolist()
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        if len(self._perm) == 0:
-            self.reset_permutation()
-        return self._perm.pop()
-
-    def __len__(self):
-        return len(self.data_source)
+from scripts.utils import read_ply_ascii_geo
 
 
 class JPEGPlenoDataset(torch.utils.data.Dataset):
@@ -83,13 +54,11 @@ def collate_pointcloud(list_data):
     return coords_batch, feats_batch
 
 
-# TODO: Change this to be prettier
 def make_jpeg_pleno_loader(
     file_list,
     batch_size=2,
     shuffle=True,
     num_workers=4,
-    repeat=False,
     collate_fn=collate_pointcloud,
 ):
     dataset = JPEGPlenoDataset(file_list)
@@ -99,12 +68,8 @@ def make_jpeg_pleno_loader(
         "collate_fn": collate_fn,
         "pin_memory": True,
         "drop_last": False,
+        "shuffle": shuffle,
     }
-    if repeat:
-        args["sampler"] = InfSampler(dataset, shuffle)
-    else:
-        args["shuffle"] = shuffle
     loader = torch.utils.data.DataLoader(dataset, **args)
 
     return loader
-

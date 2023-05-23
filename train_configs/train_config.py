@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-
+from pathlib import Path
 @dataclass
 class TrainConfig:
     model: object = None
@@ -9,3 +9,4 @@ class TrainConfig:
     nn_cfg  = None
     loss_fn: object = None
     num_epochs: int = 50
+    checkpoints_dir: Path = Path("checkpoints")

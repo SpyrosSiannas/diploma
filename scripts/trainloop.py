@@ -1,10 +1,11 @@
 import os
+from datetime import datetime
 
 import MinkowskiEngine as ME
+import torch
 from torch.utils.tensorboard import SummaryWriter
 from torch_geometric.data.batch import Batch
 from tqdm import tqdm
-import torch
 
 
 class Trainer:
@@ -17,6 +18,9 @@ class Trainer:
         self.num_epochs = train_config.num_epochs
         self.loss_fn = train_config.loss_fn
         self.writer = SummaryWriter("logs")
+        self.checkpoints_path = train_config.checkpoints_dir
+        if not self.checkpoints_path.exists():
+            os.makedirs(self.checkpoints_path)
         if cleanup_logs:
             os.system("rm -rf logs/*")
 
@@ -27,21 +31,27 @@ class Trainer:
 
     def __epoch(self, epoch: int) -> None:
         with tqdm(self.train_loader, unit="batch") as tepoch:
+            tepoch.set_description(f"Epoch {epoch + 1}")
             for data in tepoch:
-                tepoch.set_description(f"Epoch {epoch + 1}")
                 original, recon_x, loss = self.__trainloop(data)
                 tepoch.set_postfix(loss=loss)
-            if (epoch) % 5 == 0:
-                self.writer.add_mesh(
-                    "original",
-                    original[2, :, :].unsqueeze(0).detach(),
-                    global_step=epoch + 1,
+            if epoch % 4 == 0:
+                now = datetime.now()
+                torch.save(
+                    self.model.state_dict(),
+                    self.checkpoints_path
+                    / f"{self.model.__class__.__name__}_{now.strftime('%Y%m%d%H%M')}.pth",
                 )
-                self.writer.add_mesh(
-                    "point_cloud",
-                    recon_x.transpose(2, 1)[2, :, :].unsqueeze(0).detach(),
-                    global_step=epoch + 1,
-                )
+                # self.writer.add_mesh(
+                #     "original",
+                #     original[2, :, :].unsqueeze(0).detach(),
+                #     global_step=epoch + 1,
+                # )
+                # self.writer.add_mesh(
+                #     "point_cloud",
+                #     recon_x.transpose(2, 1)[2, :, :].unsqueeze(0).detach(),
+                #     global_step=epoch + 1,
+                # )
 
     def __trainloop(self, data: Batch):
         self.optimizer.zero_grad()
