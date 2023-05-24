@@ -13,6 +13,7 @@ class Trainer:
         self.model = train_config.model
         self.optimizer = train_config.optimizer
         self.train_loader = train_config.train_loader
+        self.val_loader = train_config.val_loader
         self.device = train_config.device
         self.nn_cfg = train_config.nn_cfg
         self.num_epochs = train_config.num_epochs
@@ -25,16 +26,17 @@ class Trainer:
             os.system("rm -rf logs/*")
 
     def train(self) -> None:
-        self.model.train()
         for epoch in range(self.num_epochs):
             self.__epoch(epoch)
 
     def __epoch(self, epoch: int) -> None:
         with tqdm(self.train_loader, unit="batch") as tepoch:
             tepoch.set_description(f"Epoch {epoch + 1}")
+            self.model.train()
             for data in tepoch:
                 original, recon_x, loss = self.__trainloop(data)
                 tepoch.set_postfix(loss=loss)
+
             if epoch % 4 == 0:
                 now = datetime.now()
                 torch.save(
@@ -52,6 +54,8 @@ class Trainer:
                 #     recon_x.transpose(2, 1)[2, :, :].unsqueeze(0).detach(),
                 #     global_step=epoch + 1,
                 # )
+        with torch.no_grad():
+            self.validate()
 
     def __trainloop(self, data: Batch):
         self.optimizer.zero_grad()
@@ -65,6 +69,15 @@ class Trainer:
         self.optimizer.step()  # update the parameters
         torch.cuda.empty_cache()
         return data, model_out, loss.item()
+
+    def validate(self):
+        self.model.eval()
+        with torch.no_grad():
+            for data in self.val_loader:
+                x = ME.SparseTensor(coordinates=data[0], features=data[1], device=self.device)
+                out = self.model(x, training=False)
+                loss = self.loss_fn(out, x)
+                print("Validation Loss: ", loss.item())
 
     def release(self):
         self.writer.close()

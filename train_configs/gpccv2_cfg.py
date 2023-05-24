@@ -16,11 +16,13 @@ def get_config() -> TrainConfig:
     filelist = glob.glob("dataset/jpeg-pleno/**/Ply/*.ply")
     if len(filelist) == 0:
         raise Exception("No files found in the dataset")
-    dataset_list = sorted(filelist[:750])
+    dataset_list = sorted(filelist[:900])
+    eval_list = sorted(filelist[900:1200])
     train_config = TrainConfig(
         model=model,
         optimizer=optimizer,
         train_loader=make_jpeg_pleno_loader(dataset_list),
+        val_loader=make_jpeg_pleno_loader(eval_list),
         device=device,
         loss_fn=get_gpccv2_loss,
     )

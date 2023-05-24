@@ -74,3 +74,11 @@ def write_ply_ascii_geo(filedir, coords):
         for p in coords:
             coords_str = [str(x) for x in p]
             f.writelines(" ".join(coords_str) + "\n")
+
+
+def array2vector(array, step):
+    """Ravel 2D array with multi-channel to one 1D vector by sum each channel with different step."""
+    array, step = array.long().cpu(), step.long().cpu()
+    vector = sum([array[:, i] * (step**i) for i in range(array.shape[-1])])
+
+    return vector

@@ -5,9 +5,10 @@
 ** [DONE]: Implement arithmetic encoder / decoder architecture
 ** [DONE]: Implement mpeg's octtree encoder
 ** [DONE]: Test run with dataset
-** [TODO]: Implement checkpoint mechanism
-** [TODO]: Implement tensorboard
-** [TODO]: Btter dataloader
+** [DONE] : Implement checkpoint mechanism
+** [DONE] : Btter dataloader
+** [TODO] : Implement tensorboard
+** [TODO] : Improve checkpoint, add validation!
 
 * Writing
 

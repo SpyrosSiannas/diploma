@@ -20,7 +20,7 @@ def main() -> None:
     if args.load_checkpoint:
         train_config.model.load_state_dict(torch.load(args.load_checkpoint))
     trainer = Trainer(train_config)
-    trainer.train()
+    trainer.validate()
     trainer.release()
 
 
