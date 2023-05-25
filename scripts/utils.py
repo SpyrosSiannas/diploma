@@ -2,6 +2,8 @@ import os
 from typing import List
 
 import numpy as np
+import gc
+import torch
 
 PLY_HEADER = """ply
 format ascii 1.0
@@ -82,3 +84,9 @@ def array2vector(array, step):
     vector = sum([array[:, i] * (step**i) for i in range(array.shape[-1])])
 
     return vector
+
+
+def clear_cuda_cache():
+    print(torch.cuda.list_gpu_processes())
+    gc.collect()
+    torch.cuda.empty_cache()

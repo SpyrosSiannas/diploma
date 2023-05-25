@@ -1,6 +1,9 @@
+import gc
+
 import MinkowskiEngine as ME
 import torch
 import torch.nn
+
 from .inception_residual import InceptionResidualBlock
 from .modelutils import isin, istopk, make_block
 
@@ -130,7 +133,12 @@ class InterframeDecoder(torch.nn.Module):
             out, out_cls_1, nums_list[1], ground_truth_list[1], training
         )
         #
-        out = self.relu(self.conv2(self.relu(self.up2(out))))
+        gc.collect()
+        torch.cuda.empty_cache()  #
+        inter = self.relu(self.up2(out))
+        gc.collect()
+        torch.cuda.empty_cache()
+        out = self.relu(self.conv2(inter))
         out = self.block2(out)
         out_cls_2 = self.conv2_cls(out)
         out = self.prune_voxel(

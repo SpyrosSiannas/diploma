@@ -34,6 +34,7 @@ class JPEGPlenoDataset(torch.utils.data.Dataset):
                 and cache_percent != self.last_cache_percent
             ):
                 self.last_cache_percent = cache_percent
+
         features = features.astype("float32")
         return (coordinates, features)
 
@@ -56,9 +57,9 @@ def collate_pointcloud(list_data):
 
 def make_jpeg_pleno_loader(
     file_list,
-    batch_size=2,
+    batch_size=1,
     shuffle=True,
-    num_workers=4,
+    num_workers=8,
     collate_fn=collate_pointcloud,
 ):
     dataset = JPEGPlenoDataset(file_list)
@@ -66,7 +67,7 @@ def make_jpeg_pleno_loader(
         "batch_size": batch_size,
         "num_workers": num_workers,
         "collate_fn": collate_fn,
-        "pin_memory": True,
+        "pin_memory": False,
         "drop_last": False,
         "shuffle": shuffle,
     }

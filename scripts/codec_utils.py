@@ -70,7 +70,6 @@ class FeatureCoder:
             max_v = np.frombuffer(f.read(4 * min_v_len), dtype=np.float32)[0]
         with open(in_path / (filename + "_Feats.bin"), "rb") as f:
             strings = f.read()
-
         features = self.entropy_model.decompress(
             strings, min_v, max_v, shape, shape[-1]
         )
@@ -127,7 +126,7 @@ class InterframeCodec:
         output_path = Path(out_dir).expanduser()
         y_ext = self.model.encoder(x)
         y = sort_spare_tensor(y_ext[-1])
-        num_points = [len(ground_truth) for ground_truth in y_ext[1:] + [x]]
+        num_points = [len(ground_truth) for ground_truth in y_ext[:-1] + [x]]
         with open(output_path / (filename + "_num_points.bin"), "wb") as f:
             f.write(np.array(num_points, dtype=np.int32).tobytes())
         self.feature_coder.encode(y.F, output_path, filename)
@@ -160,7 +159,7 @@ class InterframeCodec:
         # Decode labels
         with open(input_path / (filename + "_num_points.bin"), "rb") as f:
             num_points = np.frombuffer(f.read(4 * 3), dtype=np.int32).tolist()
-            num_points[-1] = int(rho * num_points[-1])
+            num_points[0] = int(rho * num_points[0])
             num_points = [[num] for num in num_points]
 
         _, out = self.model.decoder(

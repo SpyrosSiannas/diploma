@@ -1,5 +1,6 @@
 import MinkowskiEngine as ME
 import torch.nn as nn
+
 from .decoder import InterframeDecoder
 from .encoder import InterframeEncoder
 from .entropy_bottleneck import EntropyBottleneck
@@ -27,9 +28,10 @@ class InterFrameAE(nn.Module):
 
     def forward(self, x, training=False):
         # Encoder
+        # out0, out1, out2
         y_list = self.encoder(x)
         y = y_list[-1]
-        ground_truth_list = y_list[1:] + [x]
+        ground_truth_list = y_list[1::-1] + [x]
         nums_list = [
             [len(C) for C in ground_truth.decomposed_coordinates]
             for ground_truth in ground_truth_list
@@ -39,7 +41,6 @@ class InterFrameAE(nn.Module):
         y_q, likelihood = self.get_likelihood(
             y, quantize_mode="noise" if training else "symbols"
         )
-
         # Decoder
         out_cls_list, out = self.decoder(y_q, nums_list, ground_truth_list, training)
 
