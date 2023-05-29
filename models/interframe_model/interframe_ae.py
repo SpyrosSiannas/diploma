@@ -28,9 +28,9 @@ class InterFrameAE(nn.Module):
 
     def forward(self, x, training=False):
         # Encoder
-        # out0, out1, out2
         y_list = self.encoder(x)
         y = y_list[-1]
+        # out1, out0, x
         ground_truth_list = y_list[1::-1] + [x]
         nums_list = [
             [len(C) for C in ground_truth.decomposed_coordinates]

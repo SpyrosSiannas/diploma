@@ -16,6 +16,13 @@ def parse_args():
         help="Path to checkpoint to load",
     )
 
+    argparser.add_argument(
+        "--num_epochs",
+        type=int,
+        default=50,
+        help="Number of epochs to train for",
+    )
+
     return argparser.parse_args()
 
 
@@ -25,6 +32,7 @@ def main() -> None:
     torch.cuda.memory.set_per_process_memory_fraction(1.0)
     args = parse_args()
     train_config = get_config()
+    train_config.num_epochs = args.num_epochs
     if args.load_checkpoint:
         train_config.model.load_state_dict(torch.load(args.load_checkpoint))
     trainer = Trainer(train_config)

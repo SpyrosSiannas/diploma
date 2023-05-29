@@ -19,6 +19,7 @@ class Trainer:
         self.loss_fn = train_config.loss_fn
         self.writer = SummaryWriter("logs")
         self.checkpoints_path = train_config.checkpoints_dir
+        self.gradient_accumulations = 4
         if not self.checkpoints_path.exists():
             os.makedirs(self.checkpoints_path)
         if cleanup_logs:
@@ -30,19 +31,29 @@ class Trainer:
             self.__epoch(epoch)
 
     def __epoch(self, epoch: int) -> None:
+        batch_idx = 0
+        loss = 0
         with tqdm(self.train_loader, unit="batch") as tepoch:
             tepoch.set_description(f"Epoch {epoch + 1}")
             for data in tepoch:
+                batch_idx += 1
                 loss = self.__trainloop(data)
-                torch.cuda.empty_cache()
-                tepoch.set_postfix(loss=loss)
-            if epoch % 4 == 0:
-                now = datetime.now()
-                torch.save(
-                    self.model.state_dict(),
-                    self.checkpoints_path
-                    / f"{self.model.__class__.__name__}_{now.strftime('%Y%m%d%H%M')}.pth",
-                )
+                (loss / self.gradient_accumulations).backward()
+                if (
+                    batch_idx % self.gradient_accumulations == 0
+                    or batch_idx == len(self.train_loader)
+                ):
+                    self.optimizer.step()
+                    self.optimizer.zero_grad()
+                    self.model.zero_grad()
+                    torch.cuda.empty_cache()
+                tepoch.set_postfix(loss=loss.item())
+            now = datetime.now()
+            torch.save(
+                self.model.state_dict(),
+                self.checkpoints_path
+                / f"{self.model.__class__.__name__}_epoch_{epoch + 1}_{now.strftime('%Y%m%d%H%M')}.pth",
+            )
                 # self.writer.add_mesh(
                 #     "original",
                 #     original[2, :, :].unsqueeze(0).detach(),
@@ -62,9 +73,7 @@ class Trainer:
         model_out = self.model(x, training=True)
         # compute the loss
         loss = self.loss_fn(model_out, x)
-        loss.backward()  # compute the gradients
-        self.optimizer.step()  # update the parameters
-        return loss.item()
+        return loss
 
     def release(self):
         self.writer.close()

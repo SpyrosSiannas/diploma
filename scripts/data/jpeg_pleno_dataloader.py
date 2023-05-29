@@ -57,7 +57,7 @@ def collate_pointcloud(list_data):
 
 def make_jpeg_pleno_loader(
     file_list,
-    batch_size=1,
+    batch_size=2,
     shuffle=True,
     num_workers=8,
     collate_fn=collate_pointcloud,
@@ -67,7 +67,7 @@ def make_jpeg_pleno_loader(
         "batch_size": batch_size,
         "num_workers": num_workers,
         "collate_fn": collate_fn,
-        "pin_memory": False,
+        "pin_memory": True,
         "drop_last": False,
         "shuffle": shuffle,
     }
